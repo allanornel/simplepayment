@@ -1,5 +1,6 @@
 package com.simplepayment.services;
 
+import com.simplepayment.domain.exceptions.UnprocessableEntityException;
 import com.simplepayment.domain.transaction.Transaction;
 import com.simplepayment.domain.user.User;
 import com.simplepayment.dtos.TransactionDTO;
@@ -8,8 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Service
 public class TransactionService {
@@ -21,6 +22,8 @@ public class TransactionService {
 
     @Transactional
     public Transaction createTransaction(TransactionDTO transaction) throws Exception {
+        if(Objects.equals(transaction.senderId(), transaction.receiverId()))
+            throw new UnprocessableEntityException("Sender id and receiver id are the same id");
         User sender = this.userService.findUserByIdWithLock(transaction.senderId());
         User receiver = this.userService.findUserByIdWithLock(transaction.receiverId());
 
